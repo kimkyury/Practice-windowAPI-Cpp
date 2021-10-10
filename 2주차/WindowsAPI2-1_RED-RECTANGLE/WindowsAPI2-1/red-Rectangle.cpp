@@ -75,14 +75,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		p[iCount].x = x;
 		p[iCount].y = y;
 		iCount++;
+
+		InvalidateRect(hWnd, NULL, FALSE);
+		/*
 		hPen = CreatePen(PS_SOLID, 3, RGB(255, 0, 0));
 		SelectObject(hdc, hPen);
 		hBrush = CreateSolidBrush(RGB(0, 0, 255));
 		SelectObject(hdc, hBrush);
 		Rectangle(hdc, x - 20, y - 20, x + 20, y + 20);
-		return 0;
-		// 다시 그릴 책임은 프로그래머에게
-		// 단, 다시 그려야할 시점은 WM_PAINT Message로 알려준다 
+		return 0; */
+
 	case WM_PAINT: //BeginPaint()로 DB열기
 		hdc = BeginPaint(hWnd, &ps);
 
