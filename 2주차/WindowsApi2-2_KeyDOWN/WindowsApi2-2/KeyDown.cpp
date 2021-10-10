@@ -46,6 +46,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	static int x = 100;
 	static int y = 100;
 
+	//static const CHAR* str = "A"; // TEXT 안 쓰고 구현하기 (1)
+
+
 	switch (iMessage) {
 	case WM_KEYDOWN : // 0x0100:
 		switch (wParam) {
@@ -64,16 +67,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 		case VK_SPACE:
 			if (toggle == TRUE) {
+				//str = TEXT("#"); // TEXT 안 쓰고 구현하기 (2)
 				toggle = FALSE;
 			}
 			else	toggle = TRUE;
+				//str = TEXT("A"); // TEXT 안 쓰고 구현하기 (3)
 			break;
 		}
 		//InvalidateRect(hWnd,NULL,TRUE); // A가 하나씩만 생김
 		InvalidateRect(hWnd, NULL, FALSE); // hWnd handle을 가진 윈도우로 WM_PAINT message를 발생시키기, A가 연속으로 생김
 		return 0;
 	case WM_PAINT:
-		if (toggle == TRUE) {
+		/* TEXT 안쓰고 구현하기에선 밑의 if문 생략해도 됨. */
+		if (toggle == TRUE) { 
 			str = TEXT("#");
 		}
 		else str = TEXT("A");
