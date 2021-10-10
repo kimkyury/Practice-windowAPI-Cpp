@@ -37,62 +37,65 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance
 	return (int)Message.wParam;
 }
 
-
-/*
-int p[2][200];// 도형의 좌표 저장
-int iCount; // 사각형의 갯수 저장
-*/
-
-/* 구조체 생성과 선언 */
-typedef struct tagP {
+//구조체로 변경
+typedef struct tagP
+{
 	int x;
 	int y;
 } pxy;
+pxy p[1000];
+int iCount = 0;
 
-pxy p[1000]; // 구조체 배열 선언
-int iCount;
-int x, y; // 현재 좌표
-
+//int p[2][1000]; 
+//int iCount;  //iCount=0///사용자 누른 점 개수를 저장
+//Window Procedure  <- OS가 호출하면서, 인자(매개변수)로 부가적인 정보를 전달한다. 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
-	HDC hdc;
-	PAINTSTRUCT ps;
-	HPEN hPen;
-	HBRUSH hBrush;
 
+	HDC hdc;
+	HBRUSH hBrush;
+	HPEN hPen;
+	PAINTSTRUCT ps;
+	int x, y;
 	switch (iMessage) {
 	case WM_CREATE:
 		hWndMain = hWnd;
 		return 0;
-	case WM_LBUTTONDOWN:
-		/* 마우스 좌클릭 이벤트 작성 */
-		hdc = GetDC(hWnd);
 
+	case WM_LBUTTONDOWN:
+		// 특정윈도우의 그리기 관련 정보
+		hdc = GetDC(hWnd);	//모든 그리기 함수에세 cd를 전달
+
+		//x = LOWORD(lParam); // Macro
 		//x = (WORD)(lParam);  //casting
-		//x = (short)(lParam);  //casting
-		x = LOWORD(lParam); // Macro
+		x = (short)(lParam);  //casting
 		//y = HIWORD(lParam);
-		y = ((lParam)>>16); //매크로(Mecro), 캐스팅을 통해서도 가능(x = (WORD)(lParam) )
-		
-		/* p[0][iCount] = x;
-		p[1][iCount] = y; */
+		y = ((lParam) >> 16); //bitwise oprator
+
 		p[iCount].x = x;
 		p[iCount].y = y;
-		iCount++;;
-		Rectangle(hdc, x - 10, y - 10, x + 60, y + 60); // 마우스로부터 (10,10) 떨어진 위치에 60x60 사이즈 출력
+		iCount++;
+		hPen = CreatePen(PS_SOLID, 3, RGB(255, 0, 0));
+		SelectObject(hdc, hPen);
+		hBrush = CreateSolidBrush(RGB(0, 0, 255));
+		SelectObject(hdc, hBrush);
+		Rectangle(hdc, x - 20, y - 20, x + 20, y + 20);
 		return 0;
-	case WM_PAINT:
+		// 다시 그릴 책임은 프로그래머에게
+		// 단, 다시 그려야할 시점은 WM_PAINT Message로 알려준다 
+	case WM_PAINT: //BeginPaint()로 DB열기
 		hdc = BeginPaint(hWnd, &ps);
-		
-		/* 그릴 펜의 테투리, 내부 색상 조절 */
+
 		hPen = CreatePen(PS_SOLID, 3, RGB(255, 0, 0));
 		SelectObject(hdc, hPen);
 		hBrush = CreateSolidBrush(RGB(0, 0, 255));
 		SelectObject(hdc, hBrush);
 
-		for (int i = 0; i < iCount; i++) {
-			Rectangle(hdc, p[i].x - 10, p[i].y - 10, p[i].x + 60, p[i].y + 60);
+		for (int i = 0; i < iCount; i++)
+		{
+			Rectangle(hdc, p[i].x - 20, p[i].y - 20, p[i].x + 20, p[i].y + 20);
 		}
+
 		EndPaint(hWnd, &ps);
 		return 0;
 	case WM_DESTROY:
