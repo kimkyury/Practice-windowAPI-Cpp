@@ -46,7 +46,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	static int x = 100;
 	static int y = 100;
 
-	//static const CHAR* str = "A"; // TEXT 안 쓰고 구현하기 (1)
+	// static const CHAR* str = "A"; // TEXT 안 쓰고 구현하기 (1)
+
+		  /* 문자열 하나 정의//MultiBytes Character Set
+	//	static wchar_t *c = L"A"; //Unicode Character Set
+	//	static TCHAR *c = TEXT("A"); //Neutral Code 
+	//	static wchar_t c[] = (L"가abc"); //unicode
+	//  static char c[] = "가abc";  
+	//	static TCHAR c[] = TEXT("가abc");  //Neutral Code 
+	// static bool s = false;
+	*/
 
 
 	switch (iMessage) {
@@ -73,6 +82,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			else	toggle = TRUE;
 				//str = TEXT("A"); // TEXT 안 쓰고 구현하기 (3)
 			break;
+
+			/*
+			s ? c = "A" : c = "#"; //MBCS
+			//s ? c = L"A" : c = L"#"; //Unicode
+			//s ?	c = TEXT("A"): c = TEXT("#");
+			//s ? strcpy(c, "가abc") : strcpy(c, "나abc") ;  //MultiBytes Character Set
+			//s ? wcscpy(c, L"가abc") : wcscpy(c, L"나abc"); //Unicode
+			//s ? _tcscpy(c, TEXT("가abc")) : _tcscpy(c, TEXT("나abc"));		
+			s = !s;
+			break;
+			*/
+
 		}
 		//InvalidateRect(hWnd,NULL,TRUE); // A가 하나씩만 생김
 		InvalidateRect(hWnd, NULL, FALSE); // hWnd handle을 가진 윈도우로 WM_PAINT message를 발생시키기, A가 연속으로 생김
