@@ -21,10 +21,9 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{705a9e6b-76a5-469e-a47e-52de14681128}</ProjectGuid>
-    <RootNamespace>windowsAPI61</RootNamespace>
+    <ProjectGuid>{1f0a8bd8-2a65-4b2f-acd1-3eba25b25862}</ProjectGuid>
+    <RootNamespace>windowsAPI62MouseLinesWithRadio</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>windowsAPI6-1</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

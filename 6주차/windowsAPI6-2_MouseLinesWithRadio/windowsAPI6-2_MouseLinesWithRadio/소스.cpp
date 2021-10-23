@@ -48,6 +48,13 @@ line lines[500];
 int iLineCount; // 선 객체의 총 수
 COLORREF CurrentPenColor = RGB(255, 0, 0); // 현재 선 객체의 색상
 
+
+/* radio를 위한 전역변수 */
+enum { ID_R1 = 101, ID_R2, ID_R3};
+HWND r1, r2, r3;
+/* radio를 위한 전역변수 */
+
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
 	HDC hdc;
@@ -58,7 +65,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	//static BOOL bNowDraw=FALSE;
 
 	switch (iMessage) {
-	case WM_KEYDOWN: 
+	/* radio를 위한 코드 */
+	case WM_CREATE: 
+		CreateWindow(TEXT("button"), TEXT("Color"), WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 5, 5, 120, 110, hWnd, (HMENU)1, g_hInst, NULL); // 그룹박스 생성
+		r1 = CreateWindow(TEXT("button"), TEXT("RED"), WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON | WS_GROUP, 10, 20, 100, 30, hWnd, (HMENU)ID_R1, g_hInst, NULL);
+		r2 = CreateWindow(TEXT("button"), TEXT("GREEN"), WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON | WS_GROUP, 10, 50, 100, 30, hWnd, (HMENU)ID_R2, g_hInst, NULL);
+		r3 = CreateWindow(TEXT("button"), TEXT("BLUE"), WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON | WS_GROUP, 10, 80, 100, 30, hWnd, (HMENU)ID_R3, g_hInst, NULL);
+		CheckRadioButton(hWnd, ID_R1, ID_R3, ID_R1);// (hWnd, 그룹내 첫번째 라디오 버튼, 그룹 내 마지막 라디오 버튼, 체크할 라디오 버튼)
+		break;
+	/* radio를 위한 코드 */
+
+	case WM_KEYDOWN:
 		switch (wParam) {
 		case VK_BACK: // 선 객체 지우기
 			if (iLineCount > 0) {
@@ -72,13 +89,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	case WM_COMMAND: //메뉴바 적용하기
 		switch (LOWORD(wParam)) {
 		case IDM_RED:
+		case ID_R1:
+			CheckRadioButton(hWnd, ID_R1, ID_R3, ID_R1);
 			CurrentPenColor = RGB(255, 0, 0);
+			SetFocus(hWnd); //강제로 포커스 이동시키기 (라디오버튼에 포커스가 가있으므로)
 			break;
 		case IDM_GREEN:
+		case ID_R2:
+			CheckRadioButton(hWnd, ID_R1, ID_R3, ID_R2);
 			CurrentPenColor = RGB(0, 255, 0);
+			SetFocus(hWnd);
 			break;
 		case IDM_BLUE:
+		case ID_R3:
+			CheckRadioButton(hWnd, ID_R1, ID_R3, ID_R3);
 			CurrentPenColor = RGB(0, 0, 255);
+			SetFocus(hWnd);
 			break;
 		}
 		return 0;
@@ -112,7 +138,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			y = HIWORD(lParam);
 			LineTo(hdc, x, y);
 			ReleaseDC(hWnd, hdc);
-			
+
 			/* 선 객체 정보 저장 (움직이는 점) */
 			lines[iLineCount].p[lines[iLineCount].iPointCount].x = x;
 			lines[iLineCount].p[lines[iLineCount].iPointCount].y = y;
