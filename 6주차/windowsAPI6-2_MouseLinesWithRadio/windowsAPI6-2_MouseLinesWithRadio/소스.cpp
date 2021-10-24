@@ -42,18 +42,23 @@ typedef struct _line {
 	POINT p[1000];
 	int iPointCount;
 	COLORREF penColor; // 색상 속성
+	int penWidth; // 선 굵기 속성
 } line;  //선 객체 한 개의 표현
 
 line lines[500];
 int iLineCount; // 선 객체의 총 수
 COLORREF CurrentPenColor = RGB(255, 0, 0); // 현재 선 객체의 색상
 
-
-/* radio를 위한 전역변수 */
-enum { ID_R1 = 101, ID_R2, ID_R3};
+/* radio(선색상)를 위한 전역변수 */
+enum { ID_R1 = 101, ID_R2, ID_R3, ID_LISTBOX }; // listBox를 위한 ID추가
 HWND r1, r2, r3;
-/* radio를 위한 전역변수 */
+/* radio(선색상)를 위한 전역변수 */
 
+/* listBox(선굵기)를 위한 전역변수 */
+int iCurrentPenWidth = 8;
+HWND hList;
+TCHAR* Items[] = { TEXT("2"), TEXT("4"), TEXT("6"), TEXT("8") };
+/* listBox(선굵기)를 위한 전역변수 */
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
@@ -64,6 +69,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	HPEN hPen; // 색상조절을 위한 펜 객체
 	//static BOOL bNowDraw=FALSE;
 
+	int i; //선택된 list값을 위한 변수, WM_CREATE && WM_CAMMAND 에서 사용됨.
+	char buffer[100]; 
+
+
 	switch (iMessage) {
 	/* radio를 위한 코드 */
 	case WM_CREATE: 
@@ -72,8 +81,34 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		r2 = CreateWindow(TEXT("button"), TEXT("GREEN"), WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON | WS_GROUP, 10, 50, 100, 30, hWnd, (HMENU)ID_R2, g_hInst, NULL);
 		r3 = CreateWindow(TEXT("button"), TEXT("BLUE"), WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON | WS_GROUP, 10, 80, 100, 30, hWnd, (HMENU)ID_R3, g_hInst, NULL);
 		CheckRadioButton(hWnd, ID_R1, ID_R3, ID_R1);// (hWnd, 그룹내 첫번째 라디오 버튼, 그룹 내 마지막 라디오 버튼, 체크할 라디오 버튼)
-		break;
 	/* radio를 위한 코드 */
+
+	/* LIstBox를 위한 코드 */
+		hList = CreateWindow(TEXT("listbox"), NULL, WS_CHILD | WS_VISIBLE | WS_BORDER | LBS_NOTIFY, 150, 10, 100, 100, hWnd, (HMENU)ID_LISTBOX, g_hInst, NULL);
+		for ( i = 0; i < 4; i++) {
+			SendMessage(hList, LB_ADDSTRING, 0, (LPARAM)Items[i]);
+		}
+		SendMessage(hList, LB_SETCURSEL, iCurrentPenWidth / 2 - 1, 0);
+		return 0;
+	/* LIstBox를 위한 코드 */
+
+	case WM_INITMENU: //메뉴바에 현재 선택된 것을 체크표시하도록 하자.
+		if (CurrentPenColor == RGB(255, 0, 0)) {
+			CheckMenuItem((HMENU)wParam, IDM_RED, MF_BYCOMMAND | MF_CHECKED);
+			CheckMenuItem((HMENU)wParam, IDM_GREEN, MF_BYCOMMAND | MF_UNCHECKED);
+			CheckMenuItem((HMENU)wParam, IDM_BLUE, MF_BYCOMMAND | MF_UNCHECKED);
+		}
+		else if (CurrentPenColor == RGB(0, 255, 0)) {
+			CheckMenuItem((HMENU)wParam, IDM_RED, MF_BYCOMMAND | MF_UNCHECKED);
+			CheckMenuItem((HMENU)wParam, IDM_GREEN, MF_BYCOMMAND | MF_CHECKED);
+			CheckMenuItem((HMENU)wParam, IDM_BLUE, MF_BYCOMMAND | MF_UNCHECKED);
+		}
+		else if (CurrentPenColor == RGB(0, 0, 255)) {
+			CheckMenuItem((HMENU)wParam, IDM_RED, MF_BYCOMMAND | MF_UNCHECKED);
+			CheckMenuItem((HMENU)wParam, IDM_GREEN, MF_BYCOMMAND | MF_UNCHECKED);
+			CheckMenuItem((HMENU)wParam, IDM_BLUE, MF_BYCOMMAND | MF_CHECKED);
+		}
+		return 0;
 
 	case WM_KEYDOWN:
 		switch (wParam) {
@@ -82,8 +117,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				iLineCount--;
 				lines[iLineCount].iPointCount = 0; // 초기화ver1 : 백스페이스를 누를 때마다 카운트를 초기화시키기
 				InvalidateRect(hWnd, NULL, TRUE);
+				break;
 			}
-			break;
 		}
 		return 0;
 	case WM_COMMAND: //메뉴바 적용하기
@@ -106,6 +141,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			CurrentPenColor = RGB(0, 0, 255);
 			SetFocus(hWnd);
 			break;
+
+		case ID_LISTBOX: //사용자가 listBox를 조작한다면
+			switch (HIWORD(wParam)) {
+			case LBN_SELCHANGE:
+				i = SendMessage(hList, LB_GETCURSEL, 0, 0); // i는 선택된 item의 index
+				iCurrentPenWidth = (i + 1) * 2;
+				SetFocus(hWnd);
+				break;
+			}
 		}
 		return 0;
 	case WM_LBUTTONDOWN: // 선 그리기 시작
@@ -120,7 +164,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		lines[iLineCount].p[lines[iLineCount].iPointCount].y = y;
 		//lines[iLineCount].iPointCount++;
 
-		lines[iLineCount].penColor = CurrentPenColor;
+		lines[iLineCount].penColor = CurrentPenColor; //색상 지정
+		lines[iLineCount].penWidth = iCurrentPenWidth; //선 굵기 지정
 
 		return 0;
 	case WM_MOUSEMOVE:
@@ -131,7 +176,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			hdc = GetDC(hWnd);
 
 			/* 펜 설정 */
-			hPen = CreatePen(PS_SOLID, 1, lines[iLineCount].penColor);
+			hPen = CreatePen(PS_SOLID, lines[iLineCount].penWidth, lines[iLineCount].penColor); // 크기, 색상 조정
 			SelectObject(hdc, hPen);
 			MoveToEx(hdc, x, y, NULL);
 			x = LOWORD(lParam);
@@ -151,7 +196,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 		/* 선 객체의 정보 저장 ( 끝 점) */
 		iLineCount++; // 선 하나 증가
-
 		return 0;
 	case WM_LBUTTONDBLCLK:
 		InvalidateRect(hWnd, NULL, TRUE);
@@ -160,9 +204,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		hdc = BeginPaint(hWnd, &ps);
 		for (int i = 0; i < iLineCount; i++) {
 
-			hPen = CreatePen(PS_SOLID, 1, lines[i].penColor);
+			hPen = CreatePen(PS_SOLID, lines[i].penWidth, lines[i].penColor); // 펜 굵기 설정
 			hPen = (HPEN)SelectObject(hdc, hPen); // 펜 객체 선택
-
 			MoveToEx(hdc, lines[i].p[0].x, lines[i].p[0].y, NULL);
 			for (int j = 1; j < lines[i].iPointCount; j++) {
 				LineTo(hdc, lines[i].p[j].x, lines[i].p[j].y);
